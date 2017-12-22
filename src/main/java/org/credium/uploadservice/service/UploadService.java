@@ -2,7 +2,6 @@ package org.credium.uploadservice.service;
 
 import org.credium.uploadservice.model.Action;
 import org.credium.uploadservice.model.Loan;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -20,10 +19,11 @@ public class UploadService {
 		this.dataProcessorService = dataProcessorService;
 	}
 
-	public void upload(final String source, final Map<Long, Loan> loans, final Action action) {
+	public void send(final String source, final Map<Long, Loan> loans, final Action action) {
 		this.sheetSuService.updateLoans(source, loans, action).thenRun(() -> {
-			this.dataProcessorService.resetPendingTransactions(loans, action, source);
-			this.cacheService.updateWholeCache(source, loans);
+			this.dataProcessorService.resetPendingTransactions(loans, action);
+			this.cacheService.updateCache(source, loans, action);
 		});
 	}
+
 }

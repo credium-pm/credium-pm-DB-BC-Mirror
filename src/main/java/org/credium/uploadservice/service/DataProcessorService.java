@@ -31,15 +31,19 @@ public class DataProcessorService {
 
 		final Map<Long, Loan> pending = findAdded(cachedData, findAdded(pendingCreateTransactions, retrievedData));
 		this.pendingCreateTransactions.putAll(pending);
-		this.uploadService.upload(source, pending, Action.CREATE);
+		this.uploadService.send(source, pending, Action.CREATE);
 
 		final Map<Long, Loan> updated = findUpdated(cachedData, retrievedData);
 		this.pendingUpdateTransactions.forEach(updated::remove);
 		this.pendingUpdateTransactions.putAll(updated);
-		this.uploadService.upload(source, updated, Action.UPDATE);
+		this.uploadService.send(source, updated, Action.UPDATE);
+
+		Map<Long, Loan> deleted = findDeleted(cachedData, retrievedData);
+		this.pendingDeleteTransactions.putAll(deleted);
+		this.uploadService.send(source, deleted, Action.DELETE);
 	}
 
-	public void resetPendingTransactions(final Map<Long, Loan> completedTransactions, final Action action, final String source) {
+	public void resetPendingTransactions(final Map<Long, Loan> completedTransactions, final Action action) {
 		switch (action) {
 			case CREATE:
 				completedTransactions.forEach(this.pendingCreateTransactions::remove);
@@ -49,7 +53,6 @@ public class DataProcessorService {
 				break;
 			case DELETE:
 				completedTransactions.forEach(this.pendingDeleteTransactions::remove);
-				this.cacheService.removeFromCache(source, completedTransactions);
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown action: " + action);
@@ -64,6 +67,10 @@ public class DataProcessorService {
 		final Map<Long, Loan> updated = new HashMap<>();
 		Maps.difference(retrievedData, cachedData).entriesDiffering().forEach((userId, loanDifference) -> updated.put(userId, loanDifference.leftValue()));
 		return updated;
+	}
+
+	private Map<Long, Loan> findDeleted(final Map<Long, Loan> cachedData, final Map<Long, Loan> retrievedData) {
+		return Maps.difference(cachedData, retrievedData).entriesOnlyOnLeft();
 	}
 
 }

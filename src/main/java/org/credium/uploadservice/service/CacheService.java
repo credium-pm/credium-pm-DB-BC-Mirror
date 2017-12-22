@@ -1,5 +1,6 @@
 package org.credium.uploadservice.service;
 
+import org.credium.uploadservice.model.Action;
 import org.credium.uploadservice.model.Loan;
 import org.springframework.stereotype.Service;
 
@@ -23,24 +24,24 @@ public class CacheService {
 		return this.bankToLoanMap.getOrDefault(source, Collections.emptyMap());
 	}
 
-	public void updateWholeCache(final String source, final Map<Long, Loan> loans) {
+	public void updateCache(final String source, final Map<Long, Loan> loans, final Action action) {
 		if (Objects.nonNull(source) && Objects.nonNull(loans)) {
-			this.bankToLoanMap.merge(source, loans, (map1, map2) -> {
-				map1.putAll(map2);
-				return map1;
-			});
+			if (action == Action.DELETE) {
+				loans.forEach(this.bankToLoanMap.get(source)::remove);
+			} else {
+				this.bankToLoanMap.merge(source, loans, (map1, map2) -> {
+					map1.putAll(map2);
+					return map1;
+				});
+			}
 		} else {
 			throw new IllegalArgumentException();
 		}
 	}
 
-	public void removeFromCache(final String source, final Map<Long, Loan> loans) {
-		loans.forEach(this.bankToLoanMap.get(source)::remove);
-	}
-
 	public void loadProjections() {
 		final Map<String, Map<Long, Loan>> stringLoanMap = this.sheetSuService.loadProjections();
-		stringLoanMap.forEach(this::updateWholeCache);
+		stringLoanMap.forEach((source, loans) -> this.updateCache(source, loans, Action.CREATE));
 	}
 
 }

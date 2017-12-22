@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -39,7 +40,7 @@ public class SheetSuService {
 
 	public CompletableFuture<Void> updateLoans(final String source, final Map<Long, Loan> loans, final Action action) {
 		return CompletableFuture.runAsync(() -> loans.values().forEach(loan ->
-						this.ethereumService.storeDataAPI(loan.toString())
+						this.ethereumService.sendTransaction(loan.toString(), source, action, BigInteger.valueOf(loan.getUserId()))
 										.ifPresent(txReceipt -> storeEvent(txReceipt.getTransactionHash(), loan, action, source))));
 	}
 
