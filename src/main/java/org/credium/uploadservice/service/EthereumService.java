@@ -35,7 +35,7 @@ public class EthereumService {
 			if (action == Action.DELETE) {
 				return Optional.of(this.contract.deleteLoan(source, userId, data).send());
 			} else if (action == Action.CREATE || action == Action.UPDATE) {
-				return Optional.of(this.contract.saveLoan(data, source, BigInteger.valueOf(new Date().getTime())).send());
+				return Optional.of(this.contract.saveLoan(data, source, userId).send());
 			} else {
 				throw new IllegalArgumentException();
 			}
