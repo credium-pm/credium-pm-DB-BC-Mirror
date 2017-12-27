@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class PropertiesBean {
 
-	@Value("${infura.token}")
-	private String infuraToken;
+	@Value("${eth.testnet.url}")
+	private String testnetUrl;
 
 	@Value("${eth.private.key}")
 	private String ethPrivateKey;
@@ -15,8 +15,8 @@ public class PropertiesBean {
 	@Value("${eth.contract.address}")
 	private String ethContractAddress;
 
-	public String getInfuraToken() {
-		return infuraToken;
+	public String getTestnetUrl() {
+		return testnetUrl;
 	}
 
 	public String getEthPrivateKey() {

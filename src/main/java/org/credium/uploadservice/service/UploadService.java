@@ -20,10 +20,9 @@ public class UploadService {
 	}
 
 	public void send(final String source, final Map<Long, Loan> loans, final Action action) {
-		this.sheetSuService.updateLoans(source, loans, action).thenRun(() -> {
-			this.dataProcessorService.resetPendingTransactions(loans, action);
-			this.cacheService.updateCache(source, loans, action);
-		});
+		this.sheetSuService.updateLoans(source, loans, action);
+		this.dataProcessorService.resetPendingTransactions(loans, action);
+		this.cacheService.updateCache(source, loans, action);
 	}
 
 }

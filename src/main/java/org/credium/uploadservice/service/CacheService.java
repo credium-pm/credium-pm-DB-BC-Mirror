@@ -2,17 +2,25 @@ package org.credium.uploadservice.service;
 
 import org.credium.uploadservice.model.Action;
 import org.credium.uploadservice.model.Loan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class CacheService {
 
-	private SheetSuService sheetSuService;
+	private final SheetSuService sheetSuService;
+
+	@Autowired
+	@Lazy
+	private Logger logger;
 
 	public CacheService(final SheetSuService sheetSuService) {
 		this.sheetSuService = sheetSuService;
@@ -40,7 +48,14 @@ public class CacheService {
 	}
 
 	public void loadProjections() {
+		this.logger.log(Level.INFO, "Loading projections...");
+
 		final Map<String, Map<Long, Loan>> stringLoanMap = this.sheetSuService.loadProjections();
+
+		stringLoanMap.forEach((partner, loans) -> {
+			this.logger.log(Level.INFO, "Projections successfully loaded, partner{0} count={1}", new Object[]{partner, loans.keySet().size()});
+		});
+
 		stringLoanMap.forEach((source, loans) -> this.updateCache(source, loans, Action.CREATE));
 	}
 
